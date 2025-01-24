@@ -1,51 +1,36 @@
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.ArrayList;
+
 public class interfazExpo {
-    private JList<String> list1;
+    private JList<String> listaUsuarios;
     public JPanel DatosP;
-    private JButton mostrarDatosButton;
+
     public interfazExpo() {
-        mostrarDatosButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Obtener los datos de la base de datos
-                ArrayList<String> nombres = obtenerNombresDeBD();
-                // Crear un modelo para el JList
-                DefaultListModel<String> listModel = new DefaultListModel<>();
-                for (String nombre : nombres) {
-                    listModel.addElement(nombre);
-                }
-                list1 = new JList<>(listModel);
-                JScrollPane scrollPane = new JScrollPane(list1);
-                DatosP.setLayout(new BorderLayout());
-                DatosP.add(scrollPane, BorderLayout.CENTER);
-                DatosP.revalidate();
-                DatosP.repaint();
-            }
-        });
+        // Configurar el modelo del JList con los datos de la base de datos
+        DefaultListModel<String> modeloLista = new DefaultListModel<>();
+        listaUsuarios.setModel(modeloLista);
+
+        // Cargar los datos de la base de datos
+        cargarDatos(modeloLista);
     }
 
-    // Metodo para obtener los nombres de la base de datos
-    private ArrayList<String> obtenerNombresDeBD() {
-        ArrayList<String> nombres = new ArrayList<>();
-        String url = "jdbc:mysql://localhost:3306/EjemploDatos";
+    private void cargarDatos(DefaultListModel<String> modeloLista) {
+        String url = "jdbc:mysql://localhost:3306/Baseejemp";
         String usuario = "root";
         String contrasena = "123456";
-        try (Connection conn = DriverManager.getConnection(url, usuario, contrasena);
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT nombre FROM usuarios")) {
-            while (rs.next()) {
-                nombres.add(rs.getString("nombre"));
+
+        try (Connection conexion = DriverManager.getConnection(url, usuario, contrasena)) {
+            String consulta = "SELECT nombre FROM usuarios";
+            Statement statement = conexion.createStatement();
+            ResultSet resultSet = statement.executeQuery(consulta);
+
+            // Añadir los datos al modelo de la lista
+            while (resultSet.next()) {
+                modeloLista.addElement(resultSet.getString("nombre"));
             }
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al conectar con la base de datos: " + e.getMessage());
         }
-        return nombres;
     }
-
 }
