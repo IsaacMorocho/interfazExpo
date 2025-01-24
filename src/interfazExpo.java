@@ -1,36 +1,51 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.*;
 import java.util.ArrayList;
-
 public class interfazExpo {
-    private JList list1;
+    private JList<String> list1;
     public JPanel DatosP;
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                JFrame frame = new JFrame("Mostrar Datos desde MySQL");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setSize(400, 300);
-
+    private JButton mostrarDatosButton;
+    public interfazExpo() {
+        mostrarDatosButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 // Obtener los datos de la base de datos
-                ArrayList<String> nombres = ObtenerDatos.obtenerNombres();
-
+                ArrayList<String> nombres = obtenerNombresDeBD();
                 // Crear un modelo para el JList
                 DefaultListModel<String> listModel = new DefaultListModel<>();
                 for (String nombre : nombres) {
                     listModel.addElement(nombre);
                 }
-
-                // Crear el JList con el modelo
-                JList<String> jList = new JList<>(listModel);
-                JScrollPane scrollPane = new JScrollPane(jList);
-                frame.add(scrollPane, BorderLayout.CENTER);
-
-                // Mostrar la ventana
-                frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
+                list1 = new JList<>(listModel);
+                JScrollPane scrollPane = new JScrollPane(list1);
+                DatosP.setLayout(new BorderLayout());
+                DatosP.add(scrollPane, BorderLayout.CENTER);
+                DatosP.revalidate();
+                DatosP.repaint();
             }
         });
     }
+
+    // Metodo para obtener los nombres de la base de datos
+    private ArrayList<String> obtenerNombresDeBD() {
+        ArrayList<String> nombres = new ArrayList<>();
+        String url = "jdbc:mysql://localhost:3306/EjemploDatos";
+        String usuario = "root";
+        String contrasena = "123456";
+        try (Connection conn = DriverManager.getConnection(url, usuario, contrasena);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT nombre FROM usuarios")) {
+            while (rs.next()) {
+                nombres.add(rs.getString("nombre"));
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return nombres;
+    }
+
 }

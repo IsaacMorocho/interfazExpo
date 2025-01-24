@@ -8,6 +8,6 @@ public class Main {
         frame.setSize(600, 400);
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
-
+        
     }
 }
